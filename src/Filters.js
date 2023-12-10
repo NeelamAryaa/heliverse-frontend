@@ -60,13 +60,6 @@ export default function Filters({ onChangeFilter }) {
             <option value="">Select Availability</option>
             <option value="true">Yes</option>
             <option value="false">No</option>
-            {/* {availabilities.map((d) => {
-              return (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              );
-            })} */}
           </select>
         </div>
         <div className="col">

@@ -1,17 +1,26 @@
 import logo from "./logo.svg";
 import "./App.css";
 import UserCard from "./UserCard";
-// import users from "./heliverse_mock_data.json";
+
 import { useEffect, useState } from "react";
 import Pagination from "./Pagination";
 import axios from "axios";
 import Filters from "./Filters";
+import CreateTeam from "./CreateTeam";
+import Navbar from "./Navbar";
+import DisplayUsers from "./DisplayUsers";
+
+export const baseUrl = "https://heliverse-backend-v3.onrender.com";
+// export const baseUrl = "http://localhost:5000";
 
 function App() {
   const [userList, setUserList] = useState([]);
   const [name, setName] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
+  const [isCreateTeam, setIsCreateTeam] = useState(false);
+  const [team, setTeam] = useState([]);
+
   const userPerPage = 20;
 
   useEffect(() => {
@@ -22,12 +31,15 @@ function App() {
     fetchUserByName();
   }, [name]);
 
+  const onSubmitHandle = (e) => {
+    e.preventDefault();
+    fetchUserByName();
+  };
+
   const fetchUserByName = async (e) => {
     if (!name) return;
     try {
-      const res = await axios.get(
-        `https://heliverse-backend-v3.onrender.com/api/search-user?name=${name}`
-      );
+      const res = await axios.get(`${baseUrl}/api/search-user?name=${name}`);
       console.log(res.data);
 
       setUserList(res.data);
@@ -39,9 +51,7 @@ function App() {
   const getUsers = async () => {
     console.log(currentPage);
     try {
-      const res = await axios.get(
-        `https://heliverse-backend-v3.onrender.com/api/users?page=${currentPage}`
-      );
+      const res = await axios.get(`${baseUrl}/api/users?page=${currentPage}`);
       console.log(res.data);
       setTotalUsers(res.data.totalUsers);
       setUserList(res.data.users);
@@ -54,7 +64,7 @@ function App() {
     console.log(filterMap);
     try {
       const filterUsers = await axios.get(
-        `https://heliverse-backend-v3.onrender.com/filter-users?domain=${filterMap.domain}&gender=${filterMap.gender}&available=${filterMap.availability}`
+        `${baseUrl}/filter-users?domain=${filterMap.domain}&gender=${filterMap.gender}&available=${filterMap.availability}`
       );
       setUserList(filterUsers.data);
     } catch (err) {
@@ -64,36 +74,29 @@ function App() {
 
   return (
     <div className="App w-100">
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#">
-            Heliverse
-          </a>
-
-          <form class="d-flex">
-            <input
-              class="form-control me-2"
-              type="search"
-              placeholder="Search"
-              aria-label="Search"
-              onChange={(e) => setName(e.target.value)}
-            />
-
-            <button class="btn btn-lg btn-outline-success" type="submit">
-              Search
-            </button>
-          </form>
-        </div>
-      </nav>
+      <Navbar
+        onSubmitHandle={onSubmitHandle}
+        setName={setName}
+        setIsCreateTeam={setIsCreateTeam}
+      />
       <Filters onChangeFilter={onChangeFilter} />
 
-      {/* <header className="fs-1 fw-bold">Assignment</header> */}
-      <UserCard users={userList} />
-      <Pagination
+      {team.length !== 0 ? (
+        <CreateTeam
+          team={team}
+          setIsCreateTeam={setIsCreateTeam}
+          isCreateTeam={isCreateTeam}
+        />
+      ) : null}
+
+      <DisplayUsers
+        userList={userList}
         totalUsers={totalUsers}
         userPerPage={userPerPage}
         setCurrentPage={setCurrentPage}
         currentPage={currentPage}
+        isCreateTeam={isCreateTeam}
+        setTeam={setTeam}
       />
     </div>
   );
